@@ -9,7 +9,7 @@ This example will create user accounts and demonstrate how to handle model and c
 	  `username` varchar(32) NOT NULL,
 	  `password` varchar(100) NOT NULL,
 	  PRIMARY KEY (`id`)
-	) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1;
+	) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1;
 
 ## Model
 	
@@ -54,43 +54,46 @@ This example will create user accounts and demonstrate how to handle model and c
 	}
 
 ## HTML Form
-	<?php echo Form::open(Request::$current->url()) ?>
-		<?php echo Form::label('username', 'Username') ?>
-		<?php echo Form::input('username', Arr::get($values, 'username'), array('id' => 'username')) ?>
-		<?php echo Form::label('username', Arr::get($errors, 'username'), array('class' => 'error')) ?>
 
-		<?php echo Form::label('password', 'Password') ?>
-		<?php echo Form::password('password', NULL, array('id' => 'password')) ?>
-		<?php echo Form::label('password', Arr::get($errors, 'password'), array('class' => 'error')) ?>
+Please forgive my slightly ugly form. I am trying not to use any modules or unrelated magic. :)
 
-		<?php echo Form::label('password_confirm', 'Repeat Password') ?>
-		<?php echo Form::password('_external[password_confirm]', NULL, array('id' => 'password_confirm')) ?>
-		<?php echo Form::label('password_confirm', Arr::get($errors, '_external.password_confirm'), array('class' => 'error')) ?>
+	<form action="<?= URL::site('/members'); ?>" method="post" accept-charset="utf-8">
+		<label for="username">Username:</label>
+		<input id="username" type="text" name="username" value="<?= Arr::get($values, 'username'); ?>" />
+		<label for="username" class="error"><?= Arr::get($errors, 'username'); ?>
 
-		<?php echo Form::button('create', 'Create', array('type' => 'submit')) ?>
-	<?php echo Form::close() ?>
+		<label for="password">Password:</label>
+		<input id="password" type="password" name="password" value="<?= Arr::get($values, 'password'); ?>" />
+		<label for="password" class="error"><?= Arr::get($errors, 'password'); ?>
+
+		<label for="password_confirm">Repeat Password:</label>
+		<input id="password_confirm" type="password" name="_external[password_confirm]" value="<?= Arr::path($values, '_external.password_confirm'); ?>" />
+		<label for="password_confirm" class="error"><?= Arr::path($errors, '_external.password_confirm'); ?>
+
+		<button type="submit">Create</button>
+	</form>
 
 ## Controller
 
 [!!] Remember that the `password` will be hashed as soon as it is set in the model, for this reason, it is impossible to validate it's length or the fact that it matches the `password_confirm` field. The model should not care about validating the `password_confirm` field, so we add that logic to the controller and simply ask the model to bundle the errors into one tidy array. Read the [filters](filters) section to understand how those work.
-class Controller_Members extends Controller {
+
 	public function action_create()
 	{
 		$view = View::factory('members/create')
-			->set('values', $this->request->post())
+			->set('values', $_POST)
 			->bind('errors', $errors);
 
-		if ($this->request->method() == Request::POST)
+		if ($_POST)
 		{
 			$member = ORM::factory('Member')
 				// The ORM::values() method is a shortcut to assign many values at once
-				->values($this->request->post(), array('username', 'password'));
+				->values($_POST, array('username', 'password'));
 
 			$external_values = array(
 				// The unhashed password is needed for comparing to the password_confirm field
-				'password' => Arr::get($this->request->post(), 'password'),
+				'password' => Arr::get($_POST, 'password'),
 			// Add all external values
-			) + Arr::get($this->request->post(), '_external', array());
+			) + Arr::get($_POST, '_external', array());
 			$extra = Validation::factory($external_values)
 				->rule('password_confirm', 'matches', array(':validation', ':field', 'password'));
 
@@ -108,7 +111,6 @@ class Controller_Members extends Controller {
 
 		$this->response->body($view);
 	}
-}
 
 ## Messages
 

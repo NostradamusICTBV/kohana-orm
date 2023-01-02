@@ -4,20 +4,20 @@
  *
  * @package    Kohana/Auth
  * @author     Kohana Team
- * @copyright  (c) 2007-2012 Kohana Team
- * @license    http://kohanaframework.org/license
+ * @copyright  (c) Kohana Team
+ * @license    https://koseven.ga/LICENSE.md
  */
 class Model_Auth_User_Token extends ORM {
 
 	// Relationships
-	protected $_belongs_to = array(
-		'user' => array('model' => 'User'),
-	);
+	protected $_belongs_to = [
+		'user' => ['model' => 'User']
+	];
 	
-	protected $_created_column = array(
+	protected $_created_column = [
 		'column' => 'created',
-		'format' => TRUE,
-	);
+		'format' => TRUE
+	];
 
 	/**
 	 * Handles garbage collection and deleting of expired objects.
@@ -28,7 +28,7 @@ class Model_Auth_User_Token extends ORM {
 	{
 		parent::__construct($id);
 
-		if (mt_rand(1, 100) === 1)
+		if (random_int(1, 100) === 1)
 		{
 			// Do garbage collection
 			$this->delete_expired();
@@ -69,7 +69,7 @@ class Model_Auth_User_Token extends ORM {
 		{
 			$token = sha1(uniqid(Text::random('alnum', 32), TRUE));
 		}
-		while (ORM::factory('User_Token', array('token' => $token))->loaded());
+		while (ORM::factory('User_Token', ['token' => $token])->loaded());
 
 		return $token;
 	}
