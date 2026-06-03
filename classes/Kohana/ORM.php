@@ -20,7 +20,7 @@ class Kohana_ORM extends Model implements serializable {
 	 * @var array
 	 */
 	protected static $_column_cache = [];
-	
+
 	/**
 	 * Initialization storage for ORM models
 	 * @var array
@@ -28,9 +28,9 @@ class Kohana_ORM extends Model implements serializable {
 	protected static $_init_cache = [];
 
 	/**
-	 * Creates and returns a new model. 
+	 * Creates and returns a new model.
 	 * Model name must be passed with its' original casing, e.g.
-	 * 
+	 *
 	 *    $model = ORM::factory('User_Token');
 	 *
 	 * @chainable
@@ -312,7 +312,7 @@ class Kohana_ORM extends Model implements serializable {
 		{
 			$this->_object_name = strtolower(substr(get_class($this), 6));
 		}
-		
+
 		// Check if this model has already been initialized
 		if ( ! $init = Arr::get(ORM::$_init_cache, $this->_object_name, FALSE))
 		{
@@ -321,7 +321,7 @@ class Kohana_ORM extends Model implements serializable {
 				'_has_one'    => [],
 				'_has_many'   => [],
 			];
-			
+
 			// Set the object plural name if none predefined
 			if ( ! isset($this->_object_plural))
 			{
@@ -350,7 +350,7 @@ class Kohana_ORM extends Model implements serializable {
 					$init['_table_name'] = Arr::get($init, '_object_plural', $this->_object_plural);
 				}
 			}
-			
+
 			$defaults = [];
 
 			foreach ($this->_belongs_to as $alias => $details)
@@ -359,7 +359,7 @@ class Kohana_ORM extends Model implements serializable {
 				{
 					$defaults['model'] = str_replace(' ', '_', ucwords(str_replace('_', ' ', $alias)));
 				}
-				
+
 				$defaults['foreign_key'] = $alias.$this->_foreign_key_suffix;
 
 				$init['_belongs_to'][$alias] = array_merge($defaults, $details);
@@ -371,7 +371,7 @@ class Kohana_ORM extends Model implements serializable {
 				{
 					$defaults['model'] = str_replace(' ', '_', ucwords(str_replace('_', ' ', $alias)));
 				}
-				
+
 				$defaults['foreign_key'] = $this->_object_name.$this->_foreign_key_suffix;
 
 				$init['_has_one'][$alias] = array_merge($defaults, $details);
@@ -383,33 +383,33 @@ class Kohana_ORM extends Model implements serializable {
 				{
 					$defaults['model'] = str_replace(' ', '_', ucwords(str_replace('_', ' ', Inflector::singular($alias))));
 				}
-				
+
 				$defaults['foreign_key'] = $this->_object_name.$this->_foreign_key_suffix;
 				$defaults['through'] = NULL;
-				
+
 				if ( ! isset($details['far_key']))
 				{
 					$defaults['far_key'] = Inflector::singular($alias).$this->_foreign_key_suffix;
 				}
-				
+
 				$init['_has_many'][$alias] = array_merge($defaults, $details);
 			}
-			
+
 			ORM::$_init_cache[$this->_object_name] = $init;
 		}
-		
+
 		// Assign initialized properties to the current object
 		foreach ($init as $property => $value)
 		{
 			$this->{$property} = $value;
 		}
-		
+
 		// Load column information
 		$this->reload_columns();
 
 		// Clear initial model state
 		$this->clear();
-    
+
 		// Create the behaviors classes
 		foreach ($this->behaviors() as $behavior => $behavior_config)
 		{
@@ -495,7 +495,7 @@ class Kohana_ORM extends Model implements serializable {
 
 		// Reset primary key
 		$this->_primary_key_value = NULL;
-		
+
 		// Reset the loaded state
 		$this->_loaded = FALSE;
 
@@ -637,7 +637,7 @@ class Kohana_ORM extends Model implements serializable {
 	{
 		return $this->get($column);
 	}
-	
+
 	/**
 	 * Handles getting of column
 	 * Override this method to add custom get behavior
@@ -752,10 +752,10 @@ class Kohana_ORM extends Model implements serializable {
 		{
 			// Object not yet constructed, so we're loading data from a database call cast
 			$this->_cast_data[$column] = $value;
-			
+
 			return $this;
 		}
-		
+
 		if (in_array($column, $this->_serialize_columns))
 		{
 			$value = $this->_serialize_value($value);
@@ -796,7 +796,7 @@ class Kohana_ORM extends Model implements serializable {
 			{
 				$model = $this->_has_many[$column]['model'];
 				$pk = ORM::factory($model)->primary_key();
-			 
+
 				$current_ids = $this->get($column)->find_all()->as_array(NULL, 'id');
 
 				$new_ids = array_diff($value, $current_ids);
@@ -842,7 +842,7 @@ class Kohana_ORM extends Model implements serializable {
 	 * @param  array $expected Array of keys to take from $values
 	 * @return ORM
 	 */
-	public function values(array $values, array $expected = NULL)
+	public function values(array $values, ?array $expected = NULL)
 	{
 		// Default to expecting everything except the primary key
 		if ($expected === NULL)
@@ -888,7 +888,7 @@ class Kohana_ORM extends Model implements serializable {
 	{
 		if ( ! array_key_exists($column, $this->_table_columns))
 			return FALSE;
-		
+
 		return $this->_table_columns[$column]['type'];
 	}
 
@@ -902,7 +902,7 @@ class Kohana_ORM extends Model implements serializable {
 	protected function get_typed($column)
 	{
 		$value = $this->get($column);
-		
+
 		if ($value === NULL)
 			return NULL;
 
@@ -913,7 +913,7 @@ class Kohana_ORM extends Model implements serializable {
 			case 'int':    return intval($this->__get($column));
 			case 'string': return strval($this->__get($column));
 		}
-		
+
 		return $value;
 	}
 
@@ -955,7 +955,7 @@ class Kohana_ORM extends Model implements serializable {
 	}
 
 	/**
-	 * Returns the values of this object as an new object, including any related 
+	 * Returns the values of this object as an new object, including any related
 	 * one-one models that have already been loaded using with(). Removes private
 	 * columns.
 	 *
@@ -988,7 +988,7 @@ class Kohana_ORM extends Model implements serializable {
 			// Include any related objects that are already loaded
 			$object->{$column} = $model->as_object();
 		}
-    
+
 		return $object;
 	}
 
@@ -1428,7 +1428,7 @@ class Kohana_ORM extends Model implements serializable {
 	 * @throws ORM_Validation_Exception
 	 * @return ORM
 	 */
-	public function check(Validation $extra_validation = NULL)
+	public function check(?Validation $extra_validation = NULL)
 	{
 		// Determine if any external validation failed
 		$extra_errors = ($extra_validation AND ! $extra_validation->check());
@@ -1459,7 +1459,7 @@ class Kohana_ORM extends Model implements serializable {
 	 * @throws Kohana_Exception
 	 * @return ORM
 	 */
-	public function create(Validation $validation = NULL)
+	public function create(?Validation $validation = NULL)
 	{
 		if ($this->_loaded)
 			throw new Kohana_Exception('Cannot create :model model because it is already loaded.', [':model' => $this->_object_name]);
@@ -1525,7 +1525,7 @@ class Kohana_ORM extends Model implements serializable {
 	 * @throws Kohana_Exception
 	 * @return ORM
 	 */
-	public function update(Validation $validation = NULL)
+	public function update(?Validation $validation = NULL)
 	{
 		if ( ! $this->_loaded)
 			throw new Kohana_Exception('Cannot update :model model because it is not loaded.', [':model' => $this->_object_name]);
@@ -1596,7 +1596,7 @@ class Kohana_ORM extends Model implements serializable {
 	 * @param  Validation $validation Validation object
 	 * @return ORM
 	 */
-	public function save(Validation $validation = NULL)
+	public function save(?Validation $validation = NULL)
 	{
 		return $this->loaded() ? $this->update($validation) : $this->create($validation);
 	}
@@ -1628,7 +1628,7 @@ class Kohana_ORM extends Model implements serializable {
 	 * Tests if this object has a relationship to a different model,
 	 * or an array of different models. When providing far keys, the number
 	 * of relations must equal the number of keys.
-	 * 
+	 *
 	 *
 	 *     // Check if $model has the login role
 	 *     $model->has('roles', ORM::factory('role', array('name' => 'login')));
@@ -1690,7 +1690,7 @@ class Kohana_ORM extends Model implements serializable {
 	}
 
 	/**
-	 * Returns the number of relationships 
+	 * Returns the number of relationships
 	 *
 	 *     // Counts the number of times the login role is attached to $model
 	 *     $model->count_relations('roles', ORM::factory('role', array('name' => 'login')));
